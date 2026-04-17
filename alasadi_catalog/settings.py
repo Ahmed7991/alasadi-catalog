@@ -32,7 +32,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # TODO: set DEBUG = False in production (via env var).
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["umaraaland.com", "www.umaraaland.com", "localhost", "127.0.0.1"]
+
+CSRF_TRUSTED_ORIGINS = ["https://umaraaland.com", "https://www.umaraaland.com"]
 
 
 # Application definition

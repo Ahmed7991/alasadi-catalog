@@ -1,11 +1,23 @@
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import render
 
 from .models import Brand, Category, Product
 
 
 PAGE_SIZE = 24
+HOME_CATEGORY_LIMIT = 8
+
+
+def home(request):
+    """Landing page: hero, popular categories, features."""
+    categories = (
+        Category.objects
+        .annotate(product_count=Count("products"))
+        .filter(product_count__gt=0)
+        .order_by("-product_count", "name")[:HOME_CATEGORY_LIMIT]
+    )
+    return render(request, "catalog/home.html", {"categories": categories})
 
 
 def product_list(request):
