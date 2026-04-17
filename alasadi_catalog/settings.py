@@ -10,19 +10,26 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env (if present).
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ol)#9jao$fkd4suxqu33&ncppnyrhc0cu0ddy9j+7zmebi3#p&'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# TODO: set DEBUG = False in production (via env var).
 DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -31,17 +38,35 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    "unfold",
+    "unfold.contrib.filters",
+    "modeltranslation",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    
+    # مكتبات خارجية
+    "import_export",
+    
+    # تطبيقاتنا الخاصة
+    "catalog",
+    "accounts",
+    "orders",
 ]
+
+AUTH_USER_MODEL = "accounts.User"
+
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -54,11 +79,12 @@ ROOT_URLCONF = 'alasadi_catalog.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -102,16 +128,75 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "ar"
 
-TIME_ZONE = 'UTC'
+LANGUAGES = [
+    ("ar", "العربية"),
+    ("en", "English"),
+]
+
+TIME_ZONE = "Asia/Baghdad"
 
 USE_I18N = True
 
+USE_L10N = True
+
 USE_TZ = True
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+
+# ----------------------------------------------------------------------------
+# Security headers
+# ----------------------------------------------------------------------------
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+
+# Prepare for SSL (enable in production)
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+
+
+# ----------------------------------------------------------------------------
+# Django Unfold — admin UI configuration
+# https://unfoldadmin.com/docs/configuration/settings/
+# ----------------------------------------------------------------------------
+UNFOLD = {
+    "SITE_TITLE": "Land of Princes",
+    "SITE_HEADER": "Land of Princes",
+    "SITE_SUBHEADER": "Wholesale Catalog — Admin",
+    "SITE_SYMBOL": "storefront",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_USER_LINK_IN_CHANGE_LIST": True,
+    "THEME": None,  # allow user to toggle light/dark
+    "COLORS": {
+        "primary": {
+            "50":  "254 252 232",
+            "100": "254 249 195",
+            "200": "254 240 138",
+            "300": "253 224 71",
+            "400": "251 191 36",
+            "500": "254 203 14",   # #fecb0e — Amber-500 brand colour
+            "600": "219 167 10",
+            "700": "165 124 8",
+            "800": "133 77 14",
+            "900": "113 63 18",
+            "950": "66 32 6",
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+    },
+}

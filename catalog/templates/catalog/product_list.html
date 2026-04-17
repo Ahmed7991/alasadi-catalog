@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Products" %} — {% trans "Land of Princes" %}{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-6">
+
+  <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start max-h-[calc(100vh-8rem)] overflow-y-auto pe-1">
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-gray-900">{% trans "Categories" %}</h3>
+        {% if selected_category %}
+          <a href="?{% if q %}q={{ q }}{% endif %}{% if selected_brand %}&brand={{ selected_brand }}{% endif %}" class="text-xs text-brand-600 hover:underline">{% trans "Clear" %}</a>
+        {% endif %}
+      </div>
+      <ul class="space-y-0.5 text-sm">
+        <li>
+          <a
+            href="?{% if q %}q={{ q }}{% endif %}{% if selected_brand %}&brand={{ selected_brand }}{% endif %}"
+            class="block px-2.5 py-1.5 rounded-md {% if not selected_category %}bg-brand-100 text-brand-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}"
+          >
+            {% trans "All categories" %}
+          </a>
+        </li>
+        {% for c in categories %}
+          <li>
+            <a
+              href="?category={{ c.id }}{% if q %}&q={{ q }}{% endif %}{% if selected_brand %}&brand={{ selected_brand }}{% endif %}"
+              class="block px-2.5 py-1.5 rounded-md truncate {% if selected_category == c.id|stringformat:'s' %}bg-brand-100 text-brand-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}"
+              title="{{ c.name }}"
+            >
+              {{ c.name }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="pt-4 border-t border-gray-200">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-gray-900">{% trans "Brands" %}</h3>
+        {% if selected_brand %}
+          <a href="?{% if q %}q={{ q }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" class="text-xs text-brand-600 hover:underline">{% trans "Clear" %}</a>
+        {% endif %}
+      </div>
+      <ul class="space-y-0.5 text-sm">
+        <li>
+          <a
+            href="?{% if q %}q={{ q }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}"
+            class="block px-2.5 py-1.5 rounded-md {% if not selected_brand %}bg-brand-100 text-brand-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}"
+          >
+            {% trans "All brands" %}
+          </a>
+        </li>
+        {% for b in brands %}
+          <li>
+            <a
+              href="?brand={{ b.id }}{% if q %}&q={{ q }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}"
+              class="block px-2.5 py-1.5 rounded-md truncate {% if selected_brand == b.id|stringformat:'s' %}bg-brand-100 text-brand-700 font-semibold{% else %}text-gray-700 hover:bg-gray-100{% endif %}"
+              title="{{ b.name }}"
+            >
+              {{ b.name }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </aside>
+
+  <section>
+    <div class="flex items-baseline justify-between mb-5">
+      <h1 class="text-2xl font-bold text-gray-900">
+        {% if q %}
+          {% blocktrans with query=q %}Results for "{{ query }}"{% endblocktrans %}
+        {% else %}
+          {% trans "Products" %}
+        {% endif %}
+      </h1>
+      <span class="text-sm text-gray-500">
+        {{ page_obj.paginator.count }} {% trans "items" %}
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+      {% for p in products %}
+        <article class="group relative bg-gray-50 border border-gray-200 rounded-xl overflow-hidden flex flex-col transition hover:shadow-md hover:border-brand-500/40">
+
+          <div class="aspect-square bg-white flex items-center justify-center overflow-hidden border-b border-gray-200">
+            {% if p.image %}
+              <img
+                src="{{ p.image.url }}"
+                alt="{{ p.name_ar }}"
+                class="w-full h-full object-cover group-hover:scale-[1.03] transition"
+                loading="lazy"
+              >
+            {% else %}
+              <svg class="w-14 h-14 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25M3.375 4.5h17.25M12 4.5v15m-8.625-7.5h17.25"/>
+              </svg>
+            {% endif %}
+          </div>
+
+          <div class="p-3 flex flex-col gap-2 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] text-gray-500 font-mono truncate" title="{{ p.item_code }}">
+                {{ p.item_code }}
+              </span>
+              <span class="text-[10px] uppercase tracking-wide bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full font-bold truncate max-w-[140px]" title="{{ p.brand.name }}">
+                {{ p.brand.name }}
+              </span>
+            </div>
+
+            <h3 class="font-semibold text-gray-900 text-sm leading-snug line-clamp-2 min-h-[2.5rem]">
+              {{ p.name_ar }}
+            </h3>
+
+            <div class="flex items-center gap-1.5 text-xs">
+              <span class="inline-block w-2 h-2 rounded-full {% if p.total_qty > 0 %}bg-emerald-500{% else %}bg-gray-300{% endif %}"></span>
+              <span class="text-gray-600">
+                {% trans "Stock" %}:
+                <span class="font-semibold text-gray-900">{{ p.total_qty }}</span>
+              </span>
+            </div>
+
+            <div class="mt-auto pt-2 border-t border-gray-200">
+              {% if user.is_authenticated and user.role == 'contractor' %}
+                {% if p.wholesale_price %}
+                  <div class="flex items-baseline gap-1">
+                    <span class="text-lg font-black text-brand-600">{{ p.wholesale_price }}</span>
+                    <span class="text-xs text-gray-500">{% trans "IQD" %}</span>
+                  </div>
+                {% else %}
+                  <span class="text-xs text-gray-400 italic">{% trans "Price on request" %}</span>
+                {% endif %}
+              {% else %}
+                <a
+                  href="#"
+                  class="block w-full text-center bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold uppercase tracking-wide py-2 rounded-md transition"
+                >
+                  {% trans "Login for Price" %}
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      {% empty %}
+        <div class="col-span-full text-center py-20 text-gray-500">
+          <svg class="mx-auto w-16 h-16 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75h.008v.008H9.75V9.75ZM9.75 14.25h4.5m-2.25-9a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/>
+          </svg>
+          <p class="font-medium">{% trans "No products match these filters." %}</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+      <nav class="mt-8 flex items-center justify-center gap-2 text-sm">
+        {% if page_obj.has_previous %}
+          <a
+            href="?page={{ page_obj.previous_page_number }}{% if base_querystring %}&{{ base_querystring }}{% endif %}"
+            class="px-3 py-1.5 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+          >
+            {% if LANGUAGE_BIDI %}›{% else %}‹{% endif %} {% trans "Prev" %}
+          </a>
+        {% endif %}
+
+        <span class="px-3 py-1.5 text-gray-600">
+          {% blocktrans with current=page_obj.number total=page_obj.paginator.num_pages %}Page {{ current }} of {{ total }}{% endblocktrans %}
+        </span>
+
+        {% if page_obj.has_next %}
+          <a
+            href="?page={{ page_obj.next_page_number }}{% if base_querystring %}&{{ base_querystring }}{% endif %}"
+            class="px-3 py-1.5 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+          >
+            {% trans "Next" %} {% if LANGUAGE_BIDI %}‹{% else %}›{% endif %}
+          </a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}

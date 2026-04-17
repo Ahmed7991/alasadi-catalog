@@ -1,5 +1,11 @@
-venv/
-__pycache__/
-*.sqlite3
 .env
+venv/
+*.sqlite3
 media/
+import_images/
+processed_images/
+__pycache__/
+.DS_Store
+*.txt
+clean_catalog.csv
+staticfiles/
